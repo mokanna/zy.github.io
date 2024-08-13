@@ -1,15 +1,11 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>井字遊戲</title>
     <style>
         table {
             border-collapse: collapse;
-            margin: 20px auto;
         }
-
         td {
             width: 50px;
             height: 50px;
@@ -19,12 +15,9 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
-
         td:hover {
             background-color: lightgray;
         }
-
-        /* 结果弹出框样式 */
         .result-popup {
             display: none;
             position: fixed;
@@ -36,9 +29,7 @@
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             z-index: 10;
-            text-align: center;
         }
-
         .result-popup button {
             padding: 10px 20px;
             background-color: #4CAF50;
@@ -46,11 +37,6 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
         }
     </style>
 </head>
@@ -74,89 +60,134 @@
     </tr>
 </table>
 
-<!-- 结果弹出框 -->
 <div class="result-popup">
     <p id="result-message"></p>
-    <button onclick="resetGame()">確定</button>
+    <button onclick="resetGame()">确定</button>
 </div>
 
 <script>
-    let board = ['', '', '', '', '', '', '', '', ''];
-    let currentPlayer = 'X';
-    let gameActive = true;
+    let board = ["", "", "", "", "", "", "", "", ""];
+    let currentPlayer = "X";
+    let gameOver = false;
 
     function handleClick(index) {
-        if (board[index] !== '' || !gameActive) {
-            return;
-        }
-
-        board[index] = currentPlayer;
-        document.querySelectorAll('td')[index].innerText = currentPlayer;
-
-        if (checkWin()) {
-            showResult(currentPlayer + ' 獲勝!');
-            gameActive = false;
-            return;
-        } else if (checkTie()) {
-            showResult('平手!');
-            gameActive = false;
-            return;
-        }
-
-        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-        if (currentPlayer === 'O') {
-            setTimeout(makeRobotMove, 500);
+        if (board[index] === "" && !gameOver) {
+            board[index] = currentPlayer;
+            document.querySelectorAll("td")[index].innerText = currentPlayer;
+            if (checkWin()) {
+                showResult(currentPlayer + " 獲勝!");
+                gameOver = true;
+                return;
+            } else if (checkTie()) {
+                showResult("平手!");
+                gameOver = true;
+                return;
+            }
+            currentPlayer = "O";
+            makeRobotMove();
         }
     }
 
     function makeRobotMove() {
-        if (!gameActive) return;
+        let bestMove = getBestMove();
+        if (bestMove !== -1) {
+            board[bestMove] = currentPlayer;
+            document.querySelectorAll("td")[bestMove].innerText = currentPlayer;
+            if (checkWin()) {
+                showResult(currentPlayer + " 獲勝!");
+                gameOver = true;
+                return;
+            } else if (checkTie()) {
+                showResult("平手!");
+                gameOver = true;
+                return;
+            }
+            currentPlayer = "X";
+        }
+    }
 
-        let availableMoves = board.map((val, index) => val === '' ? index : null).filter(val => val !== null);
-        let move = availableMoves[Math.floor(Math.random() * availableMoves.length)];
-
-        board[move] = currentPlayer;
-        document.querySelectorAll('td')[move].innerText = currentPlayer;
-
-        if (checkWin()) {
-            showResult(currentPlayer + ' 獲勝!');
-            gameActive = false;
-            return;
-        } else if (checkTie()) {
-            showResult('平手!');
-            gameActive = false;
-            return;
+    function getBestMove() {
+        // 1. 优先获胜
+        for (let i = 0; i < board.length; i++) {
+            if (board[i] === "") {
+                board[i] = currentPlayer;
+                if (checkWin()) {
+                    board[i] = "";
+                    return i;
+                }
+                board[i] = "";
+            }
         }
 
-        currentPlayer = 'X';
+        // 2. 阻止玩家获胜
+        for (let i = 0; i < board.length; i++) {
+            if (board[i] === "") {
+                board[i] = "X";
+                if (checkWin()) {
+                    board[i] = "";
+                    return i;
+                }
+                board[i] = "";
+            }
+        }
+
+        // 3. 占据中心位置
+        if (board[4] === "") {
+            return 4;
+        }
+
+        // 4. 占据角落
+        const corners = [0, 2, 6, 8];
+        for (let i = 0; i < corners.length; i++) {
+            if (board[corners[i]] === "") {
+                return corners[i];
+            }
+        }
+
+        // 5. 随机选择
+        for (let i = 0; i < board.length; i++) {
+            if (board[i] === "") {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     function checkWin() {
-        const winPatterns = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8],
-            [0, 3, 6], [1, 4, 7], [2, 5, 8],
-            [0, 4, 8], [2, 4, 6]
+        const winConditions = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
         ];
-
-        return winPatterns.some(pattern => {
-            return pattern.every(index => board[index] === currentPlayer);
-        });
+        for (let i = 0; i < winConditions.length; i++) {
+            const [a, b, c] = winConditions[i];
+            if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                return true;
+            }
+        }
+        return false;
     }
 
     function checkTie() {
-        return board.every(cell => cell !== '');
+        return board.every(cell => cell !== "");
     }
 
     function showResult(message) {
-        document.getElementById('result-message').innerText = message;
+        document.getElementById("result-message").innerText = message;
         document.querySelector('.result-popup').style.display = 'block';
     }
 
     function resetGame() {
-        board = ['', '', '', '', '', '', '', '', ''];
-        currentPlayer = 'X';
-        gameActive = true;
-        document.querySelectorAll('td').forEach(cell => cell.innerText = '');
+        board = ["", "", "", "", "", "", "", "", ""];
+        currentPlayer = "X";
+        gameOver = false;
+        document.querySelectorAll("td").forEach(cell => cell.innerText = "");
         document.querySelector('.result-popup').style.display = 'none';
     }
 </script>
