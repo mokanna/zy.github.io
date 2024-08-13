@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>井字遊戲</title>
+<style>
+table {
+  border-collapse: collapse;
+}
+td {
+  width: 50px;
+  height: 50px;
+  border: 1px solid black;
+  text-align: center;
+  font-size: 30px;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<table>
+  <tr>
+    <td onclick="handleClick(0)"></td>
+    <td onclick="handleClick(1)"></td>
+    <td onclick="handleClick(2)"></td>
+  </tr>
+  <tr>
+    <td onclick="handleClick(3)"></td>
+    <td onclick="handleClick(4)"></td>
+    <td onclick="handleClick(5)"></td>
+  </tr>
+  <tr>
+    <td onclick="handleClick(6)"></td>
+    <td onclick="handleClick(7)"></td>
+    <td onclick="handleClick(8)"></td>
+  </tr>
+</table>
+
+<script>
+let currentPlayer = 'X';
+let humanPlayer = ''; // 玩家的角色 (X 或 O)
+let gameBoard = ['', '', '', '', '', '', '', '', ''];
+
+// 随机分配玩家角色
+function assignPlayer() {
+  humanPlayer = Math.random() < 0.5 ? 'X' : 'O';
+  currentPlayer = humanPlayer;
+  alert('你是 ' + humanPlayer);
+}
+
+assignPlayer(); // 游戏开始时分配角色
+
+function handleClick(index) {
+  if (gameBoard[index] === '' && currentPlayer === humanPlayer) {
+    gameBoard[index] = currentPlayer;
+    document.getElementsByTagName('td')[index].innerText = currentPlayer;
+
+    if (checkWin()) {
+      alert(currentPlayer + ' 获胜!');
+      resetGame();
+      return; // 阻止机器人进行下一步
+    } else if (checkTie()) {
+      alert('平手!');
+      resetGame();
+      return; // 阻止机器人进行下一步
+    }
+
+    currentPlayer = humanPlayer === 'X' ? 'O' : 'X'; // 切换到机器人
+
+    // 机器人回合
+    setTimeout(makeRobotMove, 500); // 延迟 0.5 秒，让玩家看到自己的落子
+  }
+}
+
+function makeRobotMove() {
+  // 简单的机器人策略：随机选择一个空格子
+  let emptyCells = [];
+  for (let i = 0; i < gameBoard.length; i++) {
+    if (gameBoard[i] === '') {
+      emptyCells.push(i);
+    }
+  }
+  let randomIndex = Math.floor(Math.random() * emptyCells.length);
+  let chosenIndex = emptyCells[randomIndex];
+
+  gameBoard[chosenIndex] = currentPlayer;
+  document.getElementsByTagName('td')[chosenIndex].innerText = currentPlayer;
+
+  if (checkWin()) {
+    alert(currentPlayer + ' 获胜!');
+    resetGame();
+  } else if (checkTie()) {
+    alert('平手!');
+    resetGame();
+  }
+
+  currentPlayer = humanPlayer; // 切换回玩家
+}
+
+function checkWin() {
+  // ... (与之前代码相同)
+}
+
+function checkTie() {
+  // ... (与之前代码相同)
+}
+
+function resetGame() {
+  // ... (与之前代码相同)
+  assignPlayer(); // 重新分配角色
+}
+</script>
+
+</body>
+</html>
