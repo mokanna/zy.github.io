@@ -1,111 +1,164 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
-<title>井字遊戲</title>
-<style>
-table {
-  border-collapse: collapse;
-}
-td {
-  width: 50px;
-  height: 50px;
-  border: 1px solid black;
-  text-align: center;
-  font-size: 30px;
-  cursor: pointer;
-  transition: background-color 0.3s ease; /* 添加背景颜色过渡效果 */
-}
-td:hover {
-  background-color: lightgray;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>井字遊戲</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            margin: 20px auto;
+        }
 
-/* 结果弹出框样式 */
-.result-popup {
-  display: none;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: white;
-  padding: 20px;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-  z-index: 10; /* 确保弹出框在最上层 */
-}
-.result-popup button {
-  padding: 10px 20px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-</style>
+        td {
+            width: 50px;
+            height: 50px;
+            border: 1px solid black;
+            text-align: center;
+            font-size: 30px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        td:hover {
+            background-color: lightgray;
+        }
+
+        /* 结果弹出框样式 */
+        .result-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            text-align: center;
+        }
+
+        .result-popup button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+    </style>
 </head>
 <body>
 
 <table>
-  <tr>
-    <td onclick="handleClick(0)"></td>
-    <td onclick="handleClick(1)"></td>
-    <td onclick="handleClick(2)"></td>
-  </tr>
-  <tr>
-    <td onclick="handleClick(3)"></td>
-    <td onclick="handleClick(4)"></td>
-    <td onclick="handleClick(5)"></td>
-  </tr>
-  <tr>
-    <td onclick="handleClick(6)"></td>
-    <td onclick="handleClick(7)"></td>
-    <td onclick="handleClick(8)"></td>
-  </tr>
+    <tr>
+        <td onclick="handleClick(0)"></td>
+        <td onclick="handleClick(1)"></td>
+        <td onclick="handleClick(2)"></td>
+    </tr>
+    <tr>
+        <td onclick="handleClick(3)"></td>
+        <td onclick="handleClick(4)"></td>
+        <td onclick="handleClick(5)"></td>
+    </tr>
+    <tr>
+        <td onclick="handleClick(6)"></td>
+        <td onclick="handleClick(7)"></td>
+        <td onclick="handleClick(8)"></td>
+    </tr>
 </table>
 
 <!-- 结果弹出框 -->
 <div class="result-popup">
-  <p id="result-message"></p>
-  <button onclick="resetGame()">确定</button>
+    <p id="result-message"></p>
+    <button onclick="resetGame()">確定</button>
 </div>
 
 <script>
-// ... (JavaScript 代码与之前相同)
+    let board = ['', '', '', '', '', '', '', '', ''];
+    let currentPlayer = 'X';
+    let gameActive = true;
 
-function handleClick(index) {
-  // ... (其他代码不变)
+    function handleClick(index) {
+        if (board[index] !== '' || !gameActive) {
+            return;
+        }
 
-  if (checkWin()) {
-    showResult(currentPlayer + ' 获胜!');
-    return;
-  } else if (checkTie()) {
-    showResult('平手!');
-    return;
-  }
+        board[index] = currentPlayer;
+        document.querySelectorAll('td')[index].innerText = currentPlayer;
 
-  // ... (其他代码不变)
-}
+        if (checkWin()) {
+            showResult(currentPlayer + ' 獲勝!');
+            gameActive = false;
+            return;
+        } else if (checkTie()) {
+            showResult('平手!');
+            gameActive = false;
+            return;
+        }
 
-function makeRobotMove() {
-  // ... (其他代码不变)
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        if (currentPlayer === 'O') {
+            setTimeout(makeRobotMove, 500);
+        }
+    }
 
-  if (checkWin()) {
-    showResult(currentPlayer + ' 获胜!');
-  } else if (checkTie()) {
-    showResult('平手!');
-  }
+    function makeRobotMove() {
+        if (!gameActive) return;
 
-  // ... (其他代码不变)
-}
+        let availableMoves = board.map((val, index) => val === '' ? index : null).filter(val => val !== null);
+        let move = availableMoves[Math.floor(Math.random() * availableMoves.length)];
 
-function showResult(message) {
-  document.getElementById('result-message').innerText = message;
-  document.querySelector('.result-popup').style.display = 'block';
-}
+        board[move] = currentPlayer;
+        document.querySelectorAll('td')[move].innerText = currentPlayer;
 
-function resetGame() {
-  // ... (其他代码不变)
-  document.querySelector('.result-popup').style.display = 'none'; // 隐藏弹出框
-}
+        if (checkWin()) {
+            showResult(currentPlayer + ' 獲勝!');
+            gameActive = false;
+            return;
+        } else if (checkTie()) {
+            showResult('平手!');
+            gameActive = false;
+            return;
+        }
+
+        currentPlayer = 'X';
+    }
+
+    function checkWin() {
+        const winPatterns = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
+
+        return winPatterns.some(pattern => {
+            return pattern.every(index => board[index] === currentPlayer);
+        });
+    }
+
+    function checkTie() {
+        return board.every(cell => cell !== '');
+    }
+
+    function showResult(message) {
+        document.getElementById('result-message').innerText = message;
+        document.querySelector('.result-popup').style.display = 'block';
+    }
+
+    function resetGame() {
+        board = ['', '', '', '', '', '', '', '', ''];
+        currentPlayer = 'X';
+        gameActive = true;
+        document.querySelectorAll('td').forEach(cell => cell.innerText = '');
+        document.querySelector('.result-popup').style.display = 'none';
+    }
 </script>
 
 </body>
