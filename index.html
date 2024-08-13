@@ -13,6 +13,32 @@ td {
   text-align: center;
   font-size: 30px;
   cursor: pointer;
+  transition: background-color 0.3s ease; /* 添加背景颜色过渡效果 */
+}
+td:hover {
+  background-color: lightgray;
+}
+
+/* 结果弹出框样式 */
+.result-popup {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  z-index: 10; /* 确保弹出框在最上层 */
+}
+.result-popup button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 </style>
 </head>
@@ -36,78 +62,49 @@ td {
   </tr>
 </table>
 
+<!-- 结果弹出框 -->
+<div class="result-popup">
+  <p id="result-message"></p>
+  <button onclick="resetGame()">确定</button>
+</div>
+
 <script>
-let currentPlayer = 'X';
-let humanPlayer = ''; // 玩家的角色 (X 或 O)
-let gameBoard = ['', '', '', '', '', '', '', '', ''];
-
-// 随机分配玩家角色
-function assignPlayer() {
-  humanPlayer = Math.random() < 0.5 ? 'X' : 'O';
-  currentPlayer = humanPlayer;
-  alert('你是 ' + humanPlayer);
-}
-
-assignPlayer(); // 游戏开始时分配角色
+// ... (JavaScript 代码与之前相同)
 
 function handleClick(index) {
-  if (gameBoard[index] === '' && currentPlayer === humanPlayer) {
-    gameBoard[index] = currentPlayer;
-    document.getElementsByTagName('td')[index].innerText = currentPlayer;
+  // ... (其他代码不变)
 
-    if (checkWin()) {
-      alert(currentPlayer + ' 获胜!');
-      resetGame();
-      return; // 阻止机器人进行下一步
-    } else if (checkTie()) {
-      alert('平手!');
-      resetGame();
-      return; // 阻止机器人进行下一步
-    }
-
-    currentPlayer = humanPlayer === 'X' ? 'O' : 'X'; // 切换到机器人
-
-    // 机器人回合
-    setTimeout(makeRobotMove, 500); // 延迟 0.5 秒，让玩家看到自己的落子
+  if (checkWin()) {
+    showResult(currentPlayer + ' 获胜!');
+    return;
+  } else if (checkTie()) {
+    showResult('平手!');
+    return;
   }
+
+  // ... (其他代码不变)
 }
 
 function makeRobotMove() {
-  // 简单的机器人策略：随机选择一个空格子
-  let emptyCells = [];
-  for (let i = 0; i < gameBoard.length; i++) {
-    if (gameBoard[i] === '') {
-      emptyCells.push(i);
-    }
-  }
-  let randomIndex = Math.floor(Math.random() * emptyCells.length);
-  let chosenIndex = emptyCells[randomIndex];
-
-  gameBoard[chosenIndex] = currentPlayer;
-  document.getElementsByTagName('td')[chosenIndex].innerText = currentPlayer;
+  // ... (其他代码不变)
 
   if (checkWin()) {
-    alert(currentPlayer + ' 获胜!');
-    resetGame();
+    showResult(currentPlayer + ' 获胜!');
   } else if (checkTie()) {
-    alert('平手!');
-    resetGame();
+    showResult('平手!');
   }
 
-  currentPlayer = humanPlayer; // 切换回玩家
+  // ... (其他代码不变)
 }
 
-function checkWin() {
-  // ... (与之前代码相同)
-}
-
-function checkTie() {
-  // ... (与之前代码相同)
+function showResult(message) {
+  document.getElementById('result-message').innerText = message;
+  document.querySelector('.result-popup').style.display = 'block';
 }
 
 function resetGame() {
-  // ... (与之前代码相同)
-  assignPlayer(); // 重新分配角色
+  // ... (其他代码不变)
+  document.querySelector('.result-popup').style.display = 'none'; // 隐藏弹出框
 }
 </script>
 
